@@ -20,15 +20,42 @@ class ChannelClient(ABC):
 
 
 class GoogleAdsClient(ChannelClient):
-  # TODO: Implement the Google Ads specific logic here.
-  pass
+    def __init__(self):
+        super().__init__("google")
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        GlobalBudget().allocate(campaign.daily_budget)
+        campaign_id = f"g-{uuid4()}"
+        print(f"[Google Ads] Created campaign '{campaign.name}' -> {campaign_id}")
+        return campaign_id
+
+    def pause_campaign(self, campaign_id: str) -> None:
+        print(f"[Google Ads] Paused campaign {campaign_id}")
+
 
 class FacebookAdsClient(ChannelClient):
-  # TODO: Implement the Facebook Ads specific logic here.
-  pass
+    def __init__(self):
+        super().__init__("facebook")
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        GlobalBudget().allocate(campaign.daily_budget)
+        campaign_id = f"f-{uuid4()}"
+        print(f"[Facebook Ads] Created campaign '{campaign.name}' -> {campaign_id}")
+        return campaign_id
+
+    def pause_campaign(self, campaign_id: str) -> None:
+        print(f"[Facebook Ads] Paused campaign {campaign_id}")
+
 
 class ChannelClientFactory:
+    _clients = {
+        "google": GoogleAdsClient,
+        "facebook": FacebookAdsClient,
+    }
+
     @staticmethod
     def create(channel: str) -> ChannelClient:
-      # TODO: Return the appropriate client based on the channel.
-      pass
+        client_cls = ChannelClientFactory._clients.get(channel.lower())
+        if client_cls is None:
+            raise ValueError(f"Unsupported channel: {channel}")
+        return client_cls()
