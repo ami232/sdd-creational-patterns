@@ -18,37 +18,72 @@ class Campaign:
 
 class CampaignBuilder:
     def __init__(self):
-      # TODO
-      pass
+        self.name = None
+        self.channel = None
+        self.daily_budget = None
+        self.start_date = None
+        self.end_date = None
+        self.target_audience = {}
+        self.creatives = []
+        self.tracking = {}
 
     def with_name(self, name: str):
-      # TODO
-      pass
+        self.name = name
+        return self
 
     def with_channel(self, channel: str):
-      # TODO
-      pass
+        self.channel = channel
+        return self
 
     def with_budget(self, daily_budget: float):
-      # TODO
-      pass
+        self.daily_budget = daily_budget
+        return self
 
     def with_dates(self, start_date, end_date=None):
-      # TODO
-      pass
+        self.start_date = start_date
+        self.end_date = end_date
+        return self
 
     def with_audience(self, **kwargs):
-      # TODO
-      pass
+        self.target_audience = kwargs
+        return self
 
     def add_creative(self, headline: str, image_url: str):
-      # TODO
-      pass
+        self.creatives.append({"headline": headline, "image_url": image_url})
+        return self
 
     def with_tracking(self, **kwargs):
-      # TODO
-      pass
+        self.tracking = kwargs
+        return self
 
     def build(self) -> Campaign:
-      # TODO: Validations and return Campaign instance
-      pass
+        # check everything required was set before building the campaign
+        if self.name is None or self.name == "":
+            raise ValueError("Campaign name is required")
+
+        if self.channel is None or self.channel == "":
+            raise ValueError("Campaign channel is required")
+
+        if self.daily_budget is None or self.daily_budget <= 0:
+            raise ValueError("Budget must be positive")
+
+        if self.start_date is None:
+            raise ValueError("Start date is required")
+
+        if self.end_date is not None and self.start_date > self.end_date:
+            raise ValueError("Start date must be before or equal to end date")
+
+        if len(self.creatives) == 0:
+            raise ValueError("At least one creative is required")
+
+        campaign = Campaign(
+            name=self.name,
+            channel=self.channel,
+            daily_budget=self.daily_budget,
+            start_date=self.start_date,
+            end_date=self.end_date,
+            target_audience=self.target_audience,
+            creatives=self.creatives,
+            tracking=self.tracking,
+        )
+        return campaign
