@@ -20,15 +20,39 @@ class ChannelClient(ABC):
 
 
 class GoogleAdsClient(ChannelClient):
-  # TODO: Implement the Google Ads specific logic here.
-  pass
+    def __init__(self):
+        super().__init__("google")
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        budget = GlobalBudget()
+        budget.allocate(campaign.daily_budget)
+        new_id = "g-" + str(uuid4())
+        return new_id
+
+    def pause_campaign(self, campaign_id: str) -> None:
+        pass
+
 
 class FacebookAdsClient(ChannelClient):
-  # TODO: Implement the Facebook Ads specific logic here.
-  pass
+    def __init__(self):
+        super().__init__("facebook")
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        budget = GlobalBudget()
+        budget.allocate(campaign.daily_budget)
+        new_id = "f-" + str(uuid4())
+        return new_id
+
+    def pause_campaign(self, campaign_id: str) -> None:
+        pass
+
 
 class ChannelClientFactory:
     @staticmethod
     def create(channel: str) -> ChannelClient:
-      # TODO: Return the appropriate client based on the channel.
-      pass
+        if channel == "google":
+            return GoogleAdsClient()
+        elif channel == "facebook":
+            return FacebookAdsClient()
+        else:
+            raise ValueError(f"Unknown channel: {channel}")
