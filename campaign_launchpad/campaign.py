@@ -19,27 +19,30 @@ class Campaign:
 class CampaignBuilder:
     def __init__(self):
       # TODO
-      pass
+      self.campaign = Campaign()
 
     def with_name(self, name: str):
       # TODO
-      pass
+      self.campaign.name = name
 
     def with_channel(self, channel: str):
       # TODO
-      pass
+      self.campaign.channel = channel
 
     def with_budget(self, daily_budget: float):
       # TODO
-      pass
+      self.campaign.daily_budget = daily_budget
 
     def with_dates(self, start_date, end_date=None):
       # TODO
-      pass
+      if end_date:
+          assert end_date > start_date
+      self.campaign.start_date = start_date
 
     def with_audience(self, **kwargs):
       # TODO
       pass
+
 
     def add_creative(self, headline: str, image_url: str):
       # TODO
