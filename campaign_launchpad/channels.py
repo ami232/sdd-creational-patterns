@@ -6,8 +6,11 @@ from .campaign import Campaign
 
 
 class ChannelClient(ABC):
+    id_prefix: str
+
     def __init__(self, name: str):
         self.name = name
+        self._paused = set()
 
     @abstractmethod
     def create_campaign(self, campaign: Campaign) -> str:
@@ -18,17 +21,46 @@ class ChannelClient(ABC):
     def pause_campaign(self, campaign_id: str) -> None:
         pass
 
+    def _allocate(self, campaign: Campaign) -> str:
+        GlobalBudget().allocate(campaign.daily_budget)
+        return f"{self.id_prefix}-{uuid4()}"
+
 
 class GoogleAdsClient(ChannelClient):
-  # TODO: Implement the Google Ads specific logic here.
-  pass
+    id_prefix = "g"
+
+    def __init__(self):
+        super().__init__("google")
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        return self._allocate(campaign)
+
+    def pause_campaign(self, campaign_id: str) -> None:
+        self._paused.add(campaign_id)
+
 
 class FacebookAdsClient(ChannelClient):
-  # TODO: Implement the Facebook Ads specific logic here.
-  pass
+    id_prefix = "f"
+
+    def __init__(self):
+        super().__init__("facebook")
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        return self._allocate(campaign)
+
+    def pause_campaign(self, campaign_id: str) -> None:
+        self._paused.add(campaign_id)
+
 
 class ChannelClientFactory:
+    _clients = {
+        "google": GoogleAdsClient,
+        "facebook": FacebookAdsClient,
+    }
+
     @staticmethod
     def create(channel: str) -> ChannelClient:
-      # TODO: Return the appropriate client based on the channel.
-      pass
+        client_cls = ChannelClientFactory._clients.get(str(channel).lower())
+        if client_cls is None:
+            raise ValueError(f"Unsupported channel: {channel}")
+        return client_cls()
