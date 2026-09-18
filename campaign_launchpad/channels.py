@@ -4,31 +4,55 @@ from uuid import uuid4
 from .budget import GlobalBudget
 from .campaign import Campaign
 
-
 class ChannelClient(ABC):
     def __init__(self, name: str):
         self.name = name
 
     @abstractmethod
     def create_campaign(self, campaign: Campaign) -> str:
-        # TODO: Create a campaign on this channel and return an external id.
-        pass
+        ...
 
     @abstractmethod
     def pause_campaign(self, campaign_id: str) -> None:
-        pass
+        ...
 
+    def _allocate_budget(self, campaign: Campaign) -> None:
+        GlobalBudget().allocate(campaign.daily_budget)
+
+    def _gen_external_id(self) -> str:
+        return f'{self.name[0]}-{uuid4().hex[:12]}'
 
 class GoogleAdsClient(ChannelClient):
-  # TODO: Implement the Google Ads specific logic here.
-  pass
+    def __init__(self):
+        super().__init__('google')
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        self._allocate_budget(campaign)
+        return self._gen_external_id()
+
+    def pause_campaign(self, campaign_id) -> None:
+        print(f'google campaign {campaign_id} paused')
 
 class FacebookAdsClient(ChannelClient):
-  # TODO: Implement the Facebook Ads specific logic here.
-  pass
+    def __init__(self):
+        super().__init__('facebook')
+
+    def create_campaign(self, campaign: Campaign) -> str:
+        self._allocate_budget(campaign)
+        return self._gen_external_id()
+
+    def pause_campaign(self, campaign_id) -> None:
+        print(f'facebook campaign {campaign_id} paused')
 
 class ChannelClientFactory:
-    @staticmethod
-    def create(channel: str) -> ChannelClient:
-      # TODO: Return the appropriate client based on the channel.
-      pass
+    _clients = {
+        'google': GoogleAdsClient,
+        'facebook': FacebookAdsClient,
+    }
+
+    @classmethod
+    def create(cls, channel: str) -> ChannelClient:
+        try:
+            return cls._clients[channel]()
+        except KeyError:
+            raise ValueError(f'Unsupported channel: {channel!r}') from None

@@ -6,12 +6,21 @@ class GlobalBudget:
     _instance = None
 
     def __new__(cls, initial_amount: float = 0.0):
-      # TODO: Singleton pattern implementation
-      pass
+      if cls._instance == None:
+        instance = super().__new__(cls)
+        instance._balance = float(initial_amount)
+        cls._instance = instance
+
+      return cls._instance
 
     def allocate(self, amount: float) -> None:
-      # TODO: Allocate amount from the budget
-      pass
+      if amount <= 0:
+         raise ValueError(f'allocation must be > 0, got {amount}')
+
+      if amount > self._balance:
+         raise ValueError(f'insufficient budget, tried to allocate {amount}. only {self._balance} left')
+
+      self._balance -= amount
 
     def remaining(self) -> float:
         return self._balance
