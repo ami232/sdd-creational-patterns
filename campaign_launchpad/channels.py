@@ -20,15 +20,35 @@ class ChannelClient(ABC):
 
 
 class GoogleAdsClient(ChannelClient):
-  # TODO: Implement the Google Ads specific logic here.
-  pass
+  def __init__(self):
+    super().__init__("Google Ads")
+
+  def create_campaign(self, campaign: Campaign) -> str:
+    GlobalBudget().allocate(campaign.daily_budget)
+    return f"g-{uuid4()}"
+
+  def pause_campaign(self, campaign_id: str) -> None:
+    return None
 
 class FacebookAdsClient(ChannelClient):
-  # TODO: Implement the Facebook Ads specific logic here.
-  pass
+  def __init__(self):
+    super().__init__("Facebook Ads")
+
+  def create_campaign(self, campaign: Campaign) -> str:
+    GlobalBudget().allocate(campaign.daily_budget)
+    return f"f-{uuid4()}"
+
+  def pause_campaign(self, campaign_id: str) -> None:
+    return None
 
 class ChannelClientFactory:
     @staticmethod
     def create(channel: str) -> ChannelClient:
-      # TODO: Return the appropriate client based on the channel.
-      pass
+        clients = {
+            "google": GoogleAdsClient,
+            "facebook": FacebookAdsClient,
+        }
+        try:
+            return clients[channel.lower()]()
+        except (AttributeError, KeyError):
+            raise ValueError(f"Unsupported channel: {channel}") from None
